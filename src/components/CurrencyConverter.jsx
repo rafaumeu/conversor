@@ -14,12 +14,23 @@ const CurrencyConverter = () => {
         'https://v6.exchangerate-api.com/v6/91c2fbedadee207538ea11d2/latest/USD'
       )
       .then((response) => {
-        setRates(response.data.conversion_rates || {}) // Set rates to an empty object if response data is null or undefined
+        setRates(response.data.conversion_rates) // Set rates to an empty object if response data is null or undefined
       })
       .catch((error) => {
         console.log('Ocorreu um erro: ', error)
       })
   }, [])
+
+  useEffect(() => {
+    if (rates) {
+      const rateFrom = rates[fromCurrency] || 0
+      const rateTo = rates[toCurrency] || 0
+      setConvertedAmount(((amount / rateFrom) * rateTo).toFixed(2))
+    }
+  }, [amount, rates, toCurrency, fromCurrency])
+  if (!rates) {
+    return <h1>Carregando...</h1>
+  }
   return (
     <div className='converter'>
       <h2>Conversor de Moedas</h2>
@@ -32,7 +43,10 @@ const CurrencyConverter = () => {
         }}
       />
       <span>Selecione as Moedas</span>
-      <select value={fromCurrency}>
+      <select
+        value={fromCurrency}
+        onChange={(e) => setFromCurrency(e.target.value)}
+      >
         {Object.keys(rates).map((currency) => (
           <option value={currency} key={currency}>
             {currency}
@@ -40,7 +54,10 @@ const CurrencyConverter = () => {
         ))}
       </select>
       <span>para</span>
-      <select value={toCurrency}>
+      <select
+        value={toCurrency}
+        onChange={(e) => setToCurrency(e.target.value)}
+      >
         {Object.keys(rates).map((currency) => (
           <option value={currency} key={currency}>
             {currency}
